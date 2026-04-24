@@ -142,6 +142,16 @@ class LogParser:
         return sorted(log_files)
 
 
+    def is_logfile_completed(self, logfile):
+        last_line = None
+        with open(logfile, 'r') as f:
+            for line in f:
+                if line.strip():  # Ignore les lignes vides ou contenant seulement des espaces
+                    last_line = line
+
+        return last_line is not None and 'Application ended' in last_line   
+
+
     def find_latest_log_file(self):
         pattern = self.build_filename_regex()
         dated_files = []
@@ -149,10 +159,15 @@ class LogParser:
         path = Path(self.root_log_dir)
 
         for f in path.iterdir():
-            if f.is_file() and pattern.match(f.name):
-                # extrait YYYY-MM-DD
-                date_str = f.name.rsplit("_", 1)[1].replace(".txt", "")
-                dated_files.append((f, date_str))
+            if not f.is_file():
+                continue
+            if not pattern.match(f.name):
+                continue
+            if not self.is_logfile_completed(f):
+                continue
+            # extrait YYYY-MM-DD
+            date_str = f.name.rsplit("_", 1)[1].replace(".txt", "")
+            dated_files.append((f, date_str))
 
         if not dated_files:
             return None
