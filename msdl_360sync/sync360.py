@@ -144,7 +144,7 @@ class LogParser:
 
     def is_logfile_completed(self, logfile):
         last_line = None
-        with open(logfile, 'r') as f:
+        with open(logfile, 'r', encoding='utf-8') as f:
             for line in f:
                 if line.strip():  # Ignore les lignes vides ou contenant seulement des espaces
                     last_line = line
